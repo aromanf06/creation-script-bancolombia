@@ -29,7 +29,37 @@ db.clientes.aggregate([
 **Enunciado:** El equipo de análisis de comportamiento necesita identificar los patrones de transacciones de cada cliente, mostrando la cantidad y el monto total de transacciones por tipo (depósito, retiro, transferencia) para cada cliente.
 
 **Consulta MongoDB:**
-```javascript
+```
+db.transacciones.aggregate([
+  {
+    $group: {
+      _id: {
+        cliente_id: "$cliente_ref",
+        tipo_transaccion: "$tipo_transaccion"
+      },
+      cantidad_transacciones: { $sum: 1 },
+      monto_total: { $sum: "$monto" }
+    }
+  },
+  {
+    $lookup: {
+      from: "clientes",
+      localField: "_id.cliente_id",
+      foreignField: "_id",
+      as: "cliente"
+    }
+  },
+  { $unwind: "$cliente" },
+  {
+    $project: {
+      _id: 0,
+      cliente: "$cliente.nombre",
+      tipo_transaccion: "$_id.tipo_transaccion",
+      cantidad_transacciones: 1,
+      monto_total: 1
+    }
+  }
+])
 ```
 
 ## 3. Clientes con Múltiples Tarjetas de Crédito
