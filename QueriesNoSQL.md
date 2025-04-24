@@ -92,7 +92,28 @@ db.clientes.aggregate([
 **Enunciado:** El departamento de marketing necesita conocer cuáles son los medios de pago más utilizados para depósitos, agrupados por mes, para orientar sus campañas promocionales.
 
 **Consulta MongoDB:**
-```javascript
+```
+db.transacciones.aggregate([
+  { $match: { tipo_transaccion: "deposito" } },
+  {
+    $addFields: {
+      año: { $year: { $toDate: "$fecha" } },
+      mes: { $month: { $toDate: "$fecha" } }
+    }
+  },
+  {
+    $group: {
+      _id: {
+        año: "$año",
+        mes: "$mes",
+        medio_pago: "$detalles_deposito.medio_pago"
+      },
+      cantidad_depositos: { $sum: 1 },
+      monto_total: { $sum: "$monto" }
+    }
+  }
+
+])
 ```
 
 ## 5. Detección de Cuentas con Transacciones Sospechosas
