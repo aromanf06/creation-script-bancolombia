@@ -67,7 +67,24 @@ db.transacciones.aggregate([
 **Enunciado:** El departamento de riesgo crediticio necesita identificar a los clientes que poseen más de una tarjeta de crédito, mostrando sus datos personales, cantidad de tarjetas y el detalle de cada una.
 
 **Consulta MongoDB:**
-```javascript
+```
+db.clientes.aggregate([
+  { $unwind: "$cuentas" },
+  { $unwind: "$cuentas.tarjetas" },
+  { $match: { "cuentas.tarjetas.tipo_tarjeta": "credito" } },
+  {
+    $group: {
+      _id: "$_id",
+      nombre: { $first: "$nombre" },
+      cedula: { $first: "$cedula" },
+      correo: { $first: "$correo" },
+      direccion: { $first: "$direccion" },
+      tarjetas_credito: { $push: "$cuentas.tarjetas" },
+      cantidad_tarjetas: { $sum: 1 }
+    }
+  }
+  { $match: { cantidad_tarjetas: { $gt: 1 } } }
+])
 ```
 
 ## 4. Análisis de Medios de Pago más Utilizados
