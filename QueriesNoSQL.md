@@ -7,7 +7,21 @@ A continuación se presentan 5 enunciados de consultas basados en las coleccione
 **Enunciado:** El departamento financiero necesita un informe que muestre el saldo total, promedio, máximo y mínimo por cada tipo de cuenta (ahorro y corriente) para evaluar la distribución de fondos en el banco.
 
 **Consulta MongoDB:**
-```javascript
+```
+db.clientes.aggregate([
+  { 
+    $unwind: "$cuentas" 
+  },
+  { 
+    $group: {
+      _id: "$cuentas.tipo_cuenta",
+      saldo_total: { $sum: "$cuentas.saldo" },
+      saldo_promedio: { $avg: "$cuentas.saldo" },
+      saldo_maximo: { $max: "$cuentas.saldo" },
+      saldo_minimo: { $min: "$cuentas.saldo" }
+    }
+  }
+])
 ```
 
 ## 2. Patrones de Transacciones por Cliente
