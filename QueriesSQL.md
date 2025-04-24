@@ -6,6 +6,10 @@
 
 **Consulta SQL:**
 ```sql
+select nombre,count(cliente.id_cliente) as total_cuentas,sum(cuenta.saldo) as saldo
+from cliente inner join cuenta on cliente.id_cliente=cuenta.id_cliente
+group by cliente.id_cliente
+having count(cliente.id_cliente) > 1;
 
 ```
 
@@ -15,7 +19,12 @@
 
 **Consulta SQL:**
 ```sql
-
+select nombre,
+sum(case when transaccion.tipo_transaccion = 'deposito' then transaccion.monto else 0 end) as depositos,
+sum(case when transaccion.tipo_transaccion = 'retiro' then transaccion.monto else 0 end) as retiros
+from cliente inner join cuenta on cliente.id_cliente=cuenta.id_cliente
+inner join transaccion on cuenta.num_cuenta=transaccion.num_cuenta
+group by cliente.id_cliente
 ```
 
 ## Enunciado 3: Cuentas sin tarjetas asociadas
@@ -24,7 +33,9 @@
 
 **Consulta SQL:**
 ```sql
-
+select cuenta.num_cuenta
+from cuenta left join tarjeta on cuenta.num_cuenta=tarjeta.num_cuenta
+where tarjeta.num_cuenta is null
 ```
 
 ## Enunciado 4: Análisis de saldos promedio por tipo de cuenta y comportamiento transaccional
@@ -33,7 +44,22 @@
 
 **Consulta SQL:**
 ```sql
-
+select (select 
+    avg(transaccion.MONTO) 
+from 
+    cuentaahorro
+inner join 
+    transaccion on cuentaahorro.num_cuenta = transaccion.num_cuenta
+where 
+    transaccion.fecha >= now() - interval '30 days') as monto_ahorro,
+(select 
+    avg(transaccion.MONTO)
+from 
+    cuentacorriente
+inner join 
+    transaccion on cuentacorriente.num_cuenta = transaccion.num_cuenta
+where 
+    transaccion.fecha >= now() - interval '30 days') as monto_corriente   
 ```
 
 ## Enunciado 5: Clientes con transferencias pero sin retiros en cajeros
